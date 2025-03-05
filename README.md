@@ -3,12 +3,13 @@
 A machine learning-based tool that analyzes resumes, extracts skills, and matches them with job descriptions to calculate a **match score**.
 
 ## 🚀 Features
-✅ Extracts text from resumes (PDF)  
-✅ Uses NLP to extract skills from the resume  
-✅ Matches resume with job description using TF-IDF similarity  
-✅ Provides a **match score** in percentage  
-✅ Offers an interactive UI with Streamlit (Optional)
-
+ Extract Personal Information (Name, Email, Phone)
+ Extract Work Experience & Calculate Years of Experience
+ Skill Matching (Resume vs Job Description)
+ Multiple Resume Comparison & Ranking
+ Industry-Based Score Prediction using Machine Learning
+ Generate a Downloadable PDF Report
+ Deploy the App on GCP 
 ---
 
 ## 📂 Folder Structure

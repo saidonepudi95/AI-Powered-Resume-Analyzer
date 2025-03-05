@@ -1,0 +1,8 @@
+Job Title: Software Engineer  
+Required Skills: Python, Java, AWS, Flask, Machine Learning, SQL  
+Experience: Minimum 3 years  
+Responsibilities:  
+- Develop RESTful APIs using Flask and Django  
+- Deploy applications on AWS (EC2, Lambda, S3)  
+- Work on machine learning models and optimize performance  
+- Collaborate with cross-functional teams for scalable solutions  

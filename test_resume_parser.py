@@ -1,9 +1,5 @@
 import pdfplumber
 import re
-import spacy
-
-# Load spaCy NLP model
-nlp = spacy.load("en_core_web_sm")
 
 def extract_text_from_pdf(pdf_path):
     """Extract text from a given PDF file"""
@@ -14,15 +10,22 @@ def extract_text_from_pdf(pdf_path):
     return text
 
 def extract_experience(text):
-    """Extracts years of experience from resume text using regex pattern"""
+    """Extracts years of experience from resume text using regex"""
     experience_years = re.findall(r'(\d+)\s*(?:years?|yrs|YRS|Y.o.e)', text, re.IGNORECASE)
     
     if experience_years:
         return max(map(int, experience_years))  # Get the highest number found
     return 0  # Default to 0 if no experience info found
 
-def extract_skills(text):
-    """Extracts skills from resume text using NLP"""
-    doc = nlp(text)
-    skills = [token.text for token in doc if token.pos_ in ["NOUN", "PROPN"]]
-    return list(set(skills))  # Remove duplicates
+# ✅ Run this test
+if __name__ == "__main__":
+    # Sample PDF resume (Place a resume file inside the 'data' folder)
+    pdf_path = "data/sample_resume.pdf"
+
+    # Step 1: Extract text
+    resume_text = extract_text_from_pdf(pdf_path)
+    print("Extracted Resume Text:\n", resume_text[:500])  # Print only first 500 characters
+
+    # Step 2: Extract experience
+    experience = extract_experience(resume_text)
+    print(f"\nExtracted Experience: {experience} years")
