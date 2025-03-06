@@ -1,41 +1,58 @@
-import os
 from flask import Flask, request, jsonify
 from resume_parser import extract_text_from_pdf, extract_experience
 from job_matcher import match_resume_to_job
+import os
 
 app = Flask(__name__)
 
-def load_job_description(job_title):
-    """Loads job description text from a file"""
-    job_file = f"job_descriptions/{job_title}.txt"
-    if os.path.exists(job_file):
-        with open(job_file, "r", encoding="utf-8") as file:
-            return file.read()
-    return None
+# ✅ Set the absolute path for resumes folder
+RESUME_FOLDER = "D:/AI-Projects/AI-Powered-Resume-Analyzer/data/"
+JOB_DESCRIPTION_FOLDER = "D:/AI-Projects/AI-Powered-Resume-Analyzer/job_descriptions/"
+
+@app.route("/")
+def home():
+    return "Welcome to AI-Powered Resume Analyzer API! Use the /analyze endpoint."
 
 @app.route("/analyze", methods=["POST"])
-def analyze_resume():
-    file = request.files["resume"]  # Get uploaded resume file
-    job_title = request.form["job_title"]  # Get job title to load description
+def analyze_resumes():
+    files = request.files.getlist("resumes")  # Get multiple uploaded resume files
+    job_title = request.form.get("job_title")  # Get job title
 
-    job_description = load_job_description(job_title)
-    if not job_description:
-        return jsonify({"error": "Job description not found!"}), 400
+    if not files or len(files) == 0:
+        return jsonify({"error": "At least one resume file must be uploaded!"}), 400
+    if not job_title:
+        return jsonify({"error": "Job title is missing!"}), 400
 
-    # Extract text from resume
-    resume_text = extract_text_from_pdf(file)
-    
-    # Extract experience
-    years_experience = extract_experience(resume_text)
-    
-    # Calculate match score
-    match_score = match_resume_to_job(resume_text, job_description)
+    # ✅ Load job description using absolute path
+    job_file_path = os.path.join(JOB_DESCRIPTION_FOLDER, f"{job_title}.txt")
+    if not os.path.exists(job_file_path):
+        return jsonify({"error": f"Job description '{job_title}' not found!"}), 400
 
-    return jsonify({
-        "experience_years": years_experience,
-        "match_score": f"{match_score}%",
-        "message": "Resume successfully analyzed!"
-    })
+    with open(job_file_path, "r", encoding="utf-8") as job_file:
+        job_description = job_file.read()
+
+    # ✅ Process multiple resumes
+    results = []
+    for file in files:
+        resume_path = os.path.join(RESUME_FOLDER, file.filename)
+
+        # Save uploaded file to resume folder
+        file.save(resume_path)
+
+        resume_text = extract_text_from_pdf(resume_path)
+        years_experience = extract_experience(resume_text)
+        match_score = match_resume_to_job(resume_text, job_description)
+
+        results.append({
+            "candidate_name": file.filename,
+            "experience_years": years_experience,
+            "match_score": f"{match_score}%"
+        })
+
+    # ✅ Rank candidates based on match score (Descending Order)
+    results.sort(key=lambda x: float(x["match_score"].replace("%", "")), reverse=True)
+
+    return jsonify({"ranked_candidates": results, "message": "Resumes successfully analyzed!"})
 
 if __name__ == "__main__":
     app.run(debug=True)
